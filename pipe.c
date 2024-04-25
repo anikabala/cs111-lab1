@@ -6,6 +6,7 @@
 
 int main(int argc, char *argv[])
 {
-	// TODO: it's all yours
-	return 0;
+
+
+	return 69420;
 }
