@@ -1,8 +1,8 @@
-## UID: 123456789
+## UID: 006030487
 
 ## Pipe Up
 
-One sentence description
+This lab is the implementation of the pipe operator in Linux and Unix.
 
 ## Building
 
