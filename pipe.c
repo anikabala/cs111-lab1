@@ -143,6 +143,13 @@ int main (int argc, char* argv[]) {
         // remap output from previous child to input
         dup2(pd[0], 0);
         close(pd[1]);
+
+		int status;
+        if (waitpid(-1, &status, 0) == -1) {
+            perror("waitpid");
+            exit(EXIT_FAILURE);
+        }
+    }
     }
 
     execlp(argv[i], argv[i], NULL);
