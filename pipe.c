@@ -5,20 +5,6 @@
 #include <sys/wait.h>
 #include <errno.h>
 
-// int main(int argc, char *argv[])
-// {
-	
-	// //create pipefd array and pipe
-	// int pipefd[2];
-    // if (pipe(pipefd) == -1) {
-    //     perror("Pipe error");
-    //     return 1;
-    // }
-	
-
-	// //label pipe ends 
-	// int read_end = pipefd[0];
-	// int write_end = pipefd[1];
 
 	// //first process - take in std input, output to write end of pipe
 	// //middle processes - take in from read end, output to write end of pipe
@@ -124,34 +110,41 @@ int main (int argc, char* argv[]) {
 	
 	if (argc < 2) {
         printf("No arguments provided.\n");
-        return EINVAL;
+		errno = EINVAL;
+        exit(errno);
     } 
+
     int i;
 
-    for( i=1; i<argc-1; i++)
-    {
-        int pd[2];
-        pipe(pd);
+    for(i = 1; i < argc - 1; i++) {
+        int pipefd[2];
+        pipe(pipefd);
 
         if (!fork()) {
-            dup2(pd[1], 1); // remap output back to parent
+            dup2(pipefd[1], STDOUT_FILENO); // remap output back to parent
+			close(pipefd[0]);
+			close(pipefd[1]);
             execlp(argv[i], argv[i], NULL);
             perror("exec");
-            abort();
+			errno = ENOEXEC;
+            exit(errno);//replace w e val
         }
 
         // remap output from previous child to input
-        dup2(pd[0], 0);
-        close(pd[1]);
+        dup2(pipefd[0], STDIN_FILENO);
+		close(pipefd[0]);
+        close(pipefd[1]);
 
 		int status;
         if (waitpid(-1, &status, 0) == -1) {
             perror("waitpid");
-            exit(EXIT_FAILURE);
+			errno = ECHILD;
+            exit(errno);//replace w e val
         }
     }
 
     execlp(argv[i], argv[i], NULL);
     perror("exec");
-    abort();
+	errno = ENOEXEC;
+    exit(errno);
 }
