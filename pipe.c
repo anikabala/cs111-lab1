@@ -5,8 +5,8 @@
 #include <sys/wait.h>
 #include <errno.h>
 
-int main(int argc, char *argv[])
-{
+// int main(int argc, char *argv[])
+// {
 	
 	// //create pipefd array and pipe
 	// int pipefd[2];
@@ -81,41 +81,71 @@ int main(int argc, char *argv[])
 
 
 	//special no args exit
+	// if (argc < 2) {
+    //     printf("No arguments provided.\n");
+    //     return EINVAL;
+    // } 
+
+// 	//case if only one argument -- reduces complexity by just directly running execlp
+// 	if(argc == 2){
+// 		execlp(argv[1], argv[1], NULL);
+// 		exit(0);
+// 	}
+
+// 	//define array pipefd
+// 	int pipefd[2];
+
+// 	int read_end = pipefd[0];
+// 	int write_end = pipefd[1];
+
+// 	int i;
+//     for(i = 1; i < argc-1; i++) {
+        
+//         pipe(pipefd);
+
+//         if (!fork()) { 
+//             dup2(write_end, 1); 
+//             execlp(argv[i], argv[i], NULL);
+//             perror("exec");
+//             abort();//eval
+//         }
+
+//         dup2(read_end, 0);
+//         close(read_end);
+		
+//     }
+
+//     execlp(argv[i], argv[i], NULL);
+//     perror("exec");
+//     abort();//eval 
+// }
+
+int main (int argc, char* argv[]) {
+	
 	if (argc < 2) {
         printf("No arguments provided.\n");
         return EINVAL;
     } 
+    int i;
 
-	//case if only one argument -- reduces complexity by just directly running execlp
-	if(argc == 2){
-		execlp(argv[1], argv[1], NULL);
-		exit(0);
-	}
+    for( i=1; i<argc-1; i++)
+    {
+        int pd[2];
+        pipe(pd);
 
-	//define array pipefd
-	int pipefd[2];
-
-	int read_end = pipefd[0];
-	int write_end = pipefd[1];
-
-	int i;
-    for(i = 1; i < argc-1; i++) {
-        
-        pipe(pipefd);
-
-        if (!fork()) { 
-            dup2(write_end, STDOUT_FILENO); 
+        if (!fork()) {
+            dup2(pd[1], 1); // remap output back to parent
             execlp(argv[i], argv[i], NULL);
             perror("exec");
-            abort();//eval
+            abort();
         }
 
-        dup2(read_end, STDIN_FILENO);
-        close(write_end);
-		
+        // remap output from previous child to input
+        dup2(pd[0], 0);
+        close(pd[1]);
     }
 
     execlp(argv[i], argv[i], NULL);
     perror("exec");
-    abort();//eval 
+    abort();
 }
