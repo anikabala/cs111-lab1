@@ -150,7 +150,6 @@ int main (int argc, char* argv[]) {
             exit(EXIT_FAILURE);
         }
     }
-    }
 
     execlp(argv[i], argv[i], NULL);
     perror("exec");
